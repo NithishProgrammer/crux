@@ -1,28 +1,44 @@
-# filepath: database.py
-import sqlalchemy
-from sqlalchemy import Column, Float, Integer, String, Date, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import os
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/crux"
+from sqlalchemy import Column, ForeignKey, String, create_engine , Integer
+from sqlalchemy.orm import declarative_base, sessionmaker
 
+# "+psycopg2" tells SQLAlchemy which driver to use (the one in requirements.txt)
+SQLALCHEMY_DATABASE_URL = "sqlite:///./crux.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 4. The Base class (All our tables will "inherit" from this)
+# All table classes inherit from this
 Base = declarative_base()
 
-# 5. Define the "Messages" Table structure
 
 class UserModel(Base):
     __tablename__ = "User"
 
-
-    userid = Column(String, primary_key=True, index=True) # Unique ID
+    userid = Column(String, primary_key=True, index=True)
     username = Column(String)
-    password = Column(String)
+    password = Column(String)  # stores the bcrypt hash, never the plain password
 
-# This command tells SQLAlchemy to go find all models inheriting 
-# from "Base" and create the tables in the database file.
-Base.metadata.create_all(bind=engine)
+
+class Problems(Base):
+    __tablename__ = "Problems"
+
+    userid = Column(String, ForeignKey("User.userid"))
+    problem_ID = Column(Integer, primary_key=True, index=True)
+    problem = Column(String)
+    sector = Column(String)  # stores the bcrypt hash, never the plain password
+
+
+class Solutions(Base):
+    __tablename__ = "Solutions"
+
+    sol_id = Column(String , primary_key=True)
+    userid = Column(String)
+    problem_ID = Column(Integer, index=True)
+    solution = Column(String)
+    
+
+def init_db():
+    """Create the tables. Called when the server starts (not at import time)."""
+    Base.metadata.create_all(bind=engine)

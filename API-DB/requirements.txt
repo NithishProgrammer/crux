@@ -1,7 +1,9 @@
 fastapi 
 uvicorn 
 sqlalchemy 
-psycopg2-binary 
+google-genai
+psycopg2-binary
+psycopg2[binary]
 pydantic
 psycopg2
 passlib[bcrypt]
